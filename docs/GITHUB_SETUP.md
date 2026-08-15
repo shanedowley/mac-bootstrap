@@ -113,4 +113,6 @@ GitHub access is now ready for the remaining bootstrap process.
 
 ## Next Step
 
-Restore the version-controlled development configuration using `DOTFILES.md`.
+GitHub access is now established.
+
+Return to `NEW_MAC_SETUP.md` and continue the bootstrap sequence.

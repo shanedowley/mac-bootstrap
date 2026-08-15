@@ -1,205 +1,140 @@
-# mac-bootstrap
+# New Mac Setup
 
-A reproducible macOS development environment.
+This guide is the entry point for rebuilding the development environment on a new or freshly installed Mac.
 
-This repository documents and automates the process of provisioning a new Mac from a clean installation to a fully configured development workstation.
+Follow the stages in order.
 
-The goal is not to clone an old machine.
+Detailed procedures are maintained in the linked runbooks.
 
-The goal is to rebuild a clean, understandable and maintainable environment from version-controlled sources.
+## 1. Complete macOS Setup
 
----
+Complete the initial macOS Setup Assistant and reach the desktop.
 
-## Philosophy
+Then begin the post-install process:
 
-Treat a Mac as infrastructure, not as a handcrafted machine.
+`POST_INSTALL_CHECKLIST.md`
 
-Configuration should live in Git.
+The initial preparation includes:
 
-Software installation should be reproducible.
+- installing macOS updates,
+- restoring required Apple and iCloud services,
+- verifying FileVault,
+- and installing the Xcode Command Line Tools.
 
-Projects should be cloned.
+## 2. Establish SSH Identity
 
-Secrets should be restored securely.
+Create a machine-specific SSH identity:
 
-The machine itself should be disposable.
+`SSH_SETUP.md`
 
----
+Use a separate Ed25519 key for each Mac.
 
-## Recovery Model
+Never store private SSH keys in this repository.
 
-The complete development environment is reconstructed from five independent sources:
+## 3. Establish GitHub Access
 
-```
-GitHub dotfiles repository
-        +
-Homebrew Brewfile
-        +
-GitHub project repositories
-        +
-Secure credential backups
-        +
-Personal data backups
-        =
-Reconstructed development environment
-```
+Register the Mac's SSH public key with GitHub and verify authentication:
 
-Each source has a single responsibility.
+`GITHUB_SETUP.md`
 
-| Source | Responsibility |
-|---------|----------------|
-| Dotfiles | Shell, Git, editor and user configuration |
-| Brewfile | Applications, command-line tools and packages |
-| Git repositories | Source code and projects |
-| Secure credential backup | SSH keys, GPG keys, API keys and secrets |
-| Personal backups | Documents, media and personal files |
+Once GitHub access works, clone this repository:
 
----
-
-## Repository Layout
-
-```
-mac-bootstrap/
-├── README.md
-├── docs/
-│   ├── NEW_MAC_SETUP.md
-│   ├── POST_INSTALL_CHECKLIST.md
-│   └── TROUBLESHOOTING.md
-├── Brewfile
-├── install.sh
-└── bootstrap.sh
+```bash
+mkdir -p ~/Projects
+cd ~/Projects
+git clone git@github.com:shanedowley/mac-bootstrap.git
+cd mac-bootstrap
 ```
 
-Initially only the README is required.
+The remaining bootstrap process can now be driven from this repository.
 
-Automation can be added incrementally.
+## 4. Restore Software
 
----
+Install Homebrew if it is not already available.
 
-## Current Environment
+Restore the software inventory using the repository Brewfile.
 
-Hardware
+```bash
+brew bundle --file=./Brewfile
+```
 
-- Apple Silicon Mac
+Verify that the required applications and command-line tools are available.
 
-Operating System
+Automation for this stage will be introduced later.
 
-- macOS
+## 5. Restore Configuration
 
-Development
+Restore the version-controlled user configuration:
 
-- Homebrew
-- Git
-- Zsh
-- Neovim
-- Neovim-AIDE
+`DOTFILES.md`
 
-Configuration
+The dotfiles repository uses:
 
-- Bare Git repository (`dotfiles`)
-- Home directory used as working tree
+```text
+Git directory: ~/.dotfiles
+Working tree:  ~
+```
 
----
+After restoration, start a new shell and verify that the expected configuration loads correctly.
 
-## Bootstrap Process
+## 6. Restore Development Projects
 
-The bootstrap process consists of five stages.
+Restore the required project repositories under:
 
-### Stage 1
+```text
+~/Projects
+```
 
-Prepare macOS.
+This includes Neovim-AIDE.
 
-- Install Xcode Command Line Tools
-- Configure GitHub SSH access
+Start Neovim and allow any required plugins or dependencies to install.
 
-### Stage 2
+Run the relevant Neovim-AIDE health checks before considering the development environment restored.
 
-Restore configuration.
+## 7. Restore AI Development Tools
 
-- Clone dotfiles
-- Checkout home directory
-- Restore shell configuration
+Install or verify the required AI development tools, including:
 
-### Stage 3
+- ChatGPT
+- Codex
 
-Restore software.
+Authenticate with the required services.
 
-- Install Homebrew
-- Restore Brewfile
-- Verify installed packages
+Never store authentication tokens, API keys or other secrets in this repository.
 
-### Stage 4
+## 8. Restore Secrets
 
-Restore development projects.
+Restore any additional credentials or secrets using the appropriate secure source.
 
-- Clone repositories
-- Restore Neovim-AIDE
-- Install editor plugins
+Examples may include:
 
-### Stage 5
+- application credentials,
+- API keys,
+- service tokens,
+- and other private configuration.
 
-Restore credentials and validate.
+Secrets must remain outside version-controlled repositories.
 
-- Restore secrets
-- Verify tooling
-- Run health checks
+## 9. Validate the Environment
 
----
+Complete the validation section in:
 
-## Design Principles
+`POST_INSTALL_CHECKLIST.md`
 
-- Infrastructure as code where practical.
-- Everything reproducible.
-- Everything documented.
-- Keep manual steps to a minimum.
-- Never store secrets in Git.
-- Prefer rebuilding over copying.
+Confirm that the machine is ready for development and that the expected tooling, configuration and authentication are working.
 
----
+## Troubleshooting
 
-## Future Automation
+If a bootstrap step fails, use:
 
-This repository will gradually automate more of the bootstrap process.
+`TROUBLESHOOTING.md`
 
-Potential additions include:
+Diagnose the cause before changing the system, apply the smallest appropriate fix, and verify the failed step again.
 
-- automated Homebrew installation
-- automated dotfiles installation
-- GitHub SSH setup validation
-- repository cloning
-- Neovim-AIDE installation
-- post-install validation
-- machine health checks
+## Bootstrap Complete
 
-The objective is to reduce the provisioning of a new Mac to a small number of predictable, repeatable commands.
+The bootstrap is complete when the development environment is working and can be explained entirely by the documented sources used to reconstruct it.
 
----
+The machine is replaceable.
 
-## Related Repositories
-
-| Repository | Purpose |
-|------------|---------|
-| dotfiles | Personal configuration |
-| neovim-aide | Neovim development environment |
-| mac-bootstrap | Machine provisioning |
-
-Each repository has a single responsibility.
-
----
-
-## Long-Term Vision
-
-Provisioning a new Mac should become routine.
-
-The ideal workflow is:
-
-1. Purchase a new Mac.
-2. Complete macOS setup.
-3. Clone this repository.
-4. Run the bootstrap process.
-5. Restore credentials.
-6. Resume development.
-
-The machine becomes replaceable.
-
-The development environment remains permanent.
+The environment is reproducible.
