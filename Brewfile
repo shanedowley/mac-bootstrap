@@ -1,5 +1,4 @@
 tap "felixkratz/formulae", "https://github.com/FelixKratz/homebrew-formulae", trusted: true
-tap "koekeishiya/formulae", trusted: true
 tap "nikitabobko/tap", trusted: true
 tap "samtay/tui", trusted: true
 # Automatic configure script builder
@@ -116,10 +115,6 @@ brew "tree-sitter-cli"
 brew "zlib"
 # Custom macOS statusbar with shell plugin, interaction and graph support
 brew "felixkratz/formulae/sketchybar"
-# Simple hotkey-daemon for macOS.
-brew "koekeishiya/formulae/skhd"
-# A tiling window manager for macOS based on binary space partitioning.
-brew "koekeishiya/formulae/yabai"
 # Tetris in your terminal
 brew "samtay/tui/tetris"
 # AeroSpace is an i3-like tiling window manager for macOS
