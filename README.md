@@ -218,6 +218,18 @@ The post-install checklist remains the final human verification of items that ca
 
 Each repository has a single responsibility.
 
+## Project Status
+
+The initial `mac-bootstrap` implementation is complete.
+
+The repository now provides a documented, automated and validated path for reconstructing the development environment from a clean macOS installation.
+
+The project is therefore in maintenance mode rather than active feature development.
+
+Future changes should be driven by evidence: changes to the development environment, failures encountered during a real machine rebuild, or new requirements that materially improve reproducibility.
+
+The existing principles remain the guide for those changes: understand first, document the process, automate only where appropriate, and validate the result.
+
 ## Long-Term Vision
 
 Provisioning a new Mac should become routine.
