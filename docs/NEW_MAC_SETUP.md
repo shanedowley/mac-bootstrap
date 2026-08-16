@@ -46,54 +46,82 @@ git clone git@github.com:shanedowley/mac-bootstrap.git
 cd mac-bootstrap
 ```
 
-The remaining bootstrap process can now be driven from this repository.
+This is the end of the minimum manual bootstrap boundary.
 
-## 4. Restore Software
+The repository can now drive the automated restoration of the development environment.
 
-Install Homebrew if it is not already available.
+## 4. Inspect the Bootstrap
 
-Restore the software inventory using the repository Brewfile.
+Before making changes, optionally inspect the automated bootstrap using dry-run mode:
 
 ```bash
-brew bundle --file=./Brewfile
+./bootstrap.sh --dry-run
 ```
 
-Verify that the required applications and command-line tools are available.
+Dry-run mode executes the bootstrap sequence without allowing its mutating stages to make changes.
 
-Automation for this stage will be introduced later.
+It is particularly useful when rebuilding an existing machine or verifying the expected actions before restoration.
 
-## 5. Restore Configuration
+If dry-run reports an unexpected existing repository, path or symlink, investigate it before proceeding.
 
-Restore the version-controlled user configuration:
+## 5. Run the Bootstrap
 
-`DOTFILES.md`
+Run:
 
-The dotfiles repository uses:
+```bash
+./bootstrap.sh
+```
+
+The orchestrator performs five stages in order:
+
+1. install or verify Homebrew,
+2. restore or verify Brewfile dependencies,
+3. restore and verify the bare Git dotfiles repository,
+4. restore Neovim-AIDE and its Neovim runtime symlink,
+5. validate the resulting system.
+
+The bootstrap stops if a required stage fails.
+
+It does not automatically move, delete or overwrite conflicting user files in order to force restoration to succeed.
+
+The detailed runbooks remain useful for understanding, diagnosing or manually performing individual stages:
+
+- `DOTFILES.md`
+- `TROUBLESHOOTING.md`
+
+## 6. Start a New Shell
+
+The restored dotfiles include shell configuration.
+
+After the automated restoration completes, start a new shell or terminal session so that the restored shell environment is loaded.
+
+Verify that the expected shell configuration and command-line environment are working.
+
+## 7. Verify Neovim-AIDE
+
+The automated bootstrap restores Neovim-AIDE to:
 
 ```text
-Git directory: ~/.dotfiles
-Working tree:  ~
+~/Projects/neovim-codex
 ```
 
-After restoration, start a new shell and verify that the expected configuration loads correctly.
-
-## 6. Restore Development Projects
-
-Restore the required project repositories under:
+and establishes:
 
 ```text
-~/Projects
+~/.config/nvim -> ~/Projects/neovim-codex
 ```
 
-This includes Neovim-AIDE.
+Start Neovim.
 
-Start Neovim and allow any required plugins or dependencies to install.
+Allow any required plugins or dependencies to complete their first-launch setup.
 
-Run the relevant Neovim-AIDE health checks before considering the development environment restored.
+Run the relevant Neovim-AIDE health checks before considering the development environment fully restored.
 
-## 7. Restore AI Development Tools
+## 8. Restore AI Development Tools
 
-Install or verify the required AI development tools, including:
+The Brewfile restores software managed by Homebrew, including applicable AI development tooling.
+
+After installation, complete any required interactive setup for:
 
 - ChatGPT
 - Codex
@@ -102,7 +130,7 @@ Authenticate with the required services.
 
 Never store authentication tokens, API keys or other secrets in this repository.
 
-## 8. Restore Secrets
+## 9. Restore Secrets
 
 Restore any additional credentials or secrets using the appropriate secure source.
 
@@ -115,13 +143,23 @@ Examples may include:
 
 Secrets must remain outside version-controlled repositories.
 
-## 9. Validate the Environment
+## 10. Complete Manual Application Setup
 
-Complete the validation section in:
+Some applications may require first-launch permissions, authentication or other interactive macOS configuration that should not be automated blindly.
+
+Complete those steps as required.
+
+Examples include application permissions and other macOS security or privacy prompts.
+
+## 11. Complete Final Validation
+
+The bootstrap already performs automated system validation as its final stage.
+
+Now complete the human validation checklist in:
 
 `POST_INSTALL_CHECKLIST.md`
 
-Confirm that the machine is ready for development and that the expected tooling, configuration and authentication are working.
+This confirms both the automatically verifiable machine state and the interactive or experiential checks that automation cannot safely determine.
 
 ## Troubleshooting
 
@@ -129,11 +167,22 @@ If a bootstrap step fails, use:
 
 `TROUBLESHOOTING.md`
 
+The individual scripts under `scripts/` can also be run independently when diagnosing a particular stage.
+
 Diagnose the cause before changing the system, apply the smallest appropriate fix, and verify the failed step again.
+
+Do not bypass a failed bootstrap stage simply to allow later stages to run.
 
 ## Bootstrap Complete
 
-The bootstrap is complete when the development environment is working and can be explained entirely by the documented sources used to reconstruct it.
+The bootstrap is complete when:
+
+- automated validation passes,
+- the required applications and development tools work,
+- interactive authentication is complete,
+- required secrets have been restored securely,
+- Neovim-AIDE works correctly,
+- and the post-install checklist is complete.
 
 The machine is replaceable.
 

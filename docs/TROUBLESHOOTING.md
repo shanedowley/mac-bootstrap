@@ -48,6 +48,91 @@ Known cause of the problem.
 # Commands used to verify the fix
 ```
 
+## Known Problems
+
+### Bare Dotfiles Checkout Hangs
+
+**Symptoms**
+
+- `git checkout` against the bare dotfiles repository does not complete.
+- No dotfiles are written to the working tree.
+- The Git process remains running with an `index.lock`.
+- The process may also hold a Unix socket.
+
+**Cause**
+
+The effective Git configuration enables filesystem monitoring:
+
+```text
+core.fsmonitor=true
+```
+
+This may be inherited from the global Git configuration.
+
+For the dotfiles architecture used here — a bare repository with the home directory supplied separately as the working tree — filesystem monitoring must be disabled locally before checkout.
+
+**Diagnosis**
+
+Inspect the effective Git configuration:
+
+```bash
+git --git-dir="$HOME/.dotfiles" config --list --show-origin
+```
+
+Inspect the repository-local setting:
+
+```bash
+git --git-dir="$HOME/.dotfiles" config --get core.fsmonitor
+```
+
+If a checkout is already hanging, inspect the Git process:
+
+```bash
+ps -ax -o pid,ppid,stat,etime,command | grep -E '[g]it.*checkout'
+```
+
+**Resolution**
+
+Stop the hanging checkout if required.
+
+Configure the bare repository to disable filesystem monitoring locally:
+
+```bash
+git --git-dir="$HOME/.dotfiles" config core.fsmonitor false
+```
+
+Retry the checkout:
+
+```bash
+git --git-dir="$HOME/.dotfiles" \
+  --work-tree="$HOME" \
+  checkout
+```
+
+**Verification**
+
+Confirm the repository-local setting:
+
+```bash
+git --git-dir="$HOME/.dotfiles" config --get core.fsmonitor
+```
+
+Expected:
+
+```text
+false
+```
+
+Verify that repository status completes normally and is clean:
+
+```bash
+git --git-dir="$HOME/.dotfiles" \
+  --work-tree="$HOME" \
+  status --short
+```
+
+Expected: no output.
+
 ## General Recovery
 
 If the cause of a failure is unclear:

@@ -16,6 +16,18 @@ To rebuild a Mac, begin with:
 
 That guide provides the end-to-end bootstrap sequence and links to the detailed runbooks.
 
+Once the minimum prerequisites and GitHub access are established, the automated portion of the rebuild is driven by:
+
+```bash
+./bootstrap.sh
+```
+
+Use dry-run mode first when you want to inspect the intended actions without making changes:
+
+```bash
+./bootstrap.sh --dry-run
+```
+
 ## Philosophy
 
 Treat a Mac as infrastructure, not as a handcrafted machine.
@@ -29,6 +41,8 @@ Projects should be cloned.
 Secrets should be restored securely.
 
 The machine itself should be disposable.
+
+Automation should remain understandable, independently testable and free from hidden side effects.
 
 See `WORKING_AGREEMENT.md` for the engineering principles used to develop this repository.
 
@@ -67,6 +81,7 @@ mac-bootstrap/
 ├── README.md
 ├── WORKING_AGREEMENT.md
 ├── Brewfile
+├── bootstrap.sh
 ├── docs/
 │   ├── NEW_MAC_SETUP.md
 │   ├── POST_INSTALL_CHECKLIST.md
@@ -75,9 +90,16 @@ mac-bootstrap/
 │   ├── DOTFILES.md
 │   └── TROUBLESHOOTING.md
 └── scripts/
+    ├── install-homebrew.sh
+    ├── restore-brewfile.sh
+    ├── restore-dotfiles.sh
+    ├── clone-projects.sh
+    └── validate-system.sh
 ```
 
-Automation will be introduced incrementally under `scripts/`.
+The scripts remain independently executable so that each stage can be understood, tested and diagnosed separately.
+
+`bootstrap.sh` provides the orchestration layer over those individual stages.
 
 ## Current Environment
 
@@ -104,37 +126,87 @@ Configuration uses:
 - a bare Git dotfiles repository at `~/.dotfiles`
 - the home directory as its working tree
 
+Neovim-AIDE is restored to:
+
+```text
+~/Projects/neovim-codex
+```
+
+with the Neovim runtime path linked as:
+
+```text
+~/.config/nvim -> ~/Projects/neovim-codex
+```
+
 ## Bootstrap Model
 
-The bootstrap process follows a simple sequence:
+The complete bootstrap process deliberately has a small manual boundary.
 
-1. Prepare macOS.
-2. Install Xcode Command Line Tools.
+Before the repository can automate the machine, the Mac must have enough tooling and authentication configured to obtain it.
+
+The end-to-end sequence is:
+
+1. Complete macOS setup.
+2. Install the Xcode Command Line Tools.
 3. Establish SSH identity.
 4. Establish GitHub access.
 5. Clone `mac-bootstrap`.
-6. Restore software using Homebrew and the Brewfile.
-7. Restore version-controlled configuration.
-8. Restore development projects and Neovim-AIDE.
-9. Restore and authenticate AI development tools.
-10. Validate the completed environment.
+6. Optionally inspect the automated stages with `./bootstrap.sh --dry-run`.
+7. Run `./bootstrap.sh`.
+8. Complete any remaining interactive authentication and secret restoration.
+9. Perform any required first-launch checks.
+10. Confirm the completed environment using the post-install checklist.
+
+The orchestrator runs five automated stages in order:
+
+1. Install or verify Homebrew.
+2. Restore or verify Brewfile dependencies.
+3. Restore and verify the bare Git dotfiles repository.
+4. Restore Neovim-AIDE and its Neovim runtime link.
+5. Validate the resulting system.
+
+The bootstrap stops on failure rather than silently continuing with an incomplete environment.
 
 Detailed instructions are maintained in `docs/NEW_MAC_SETUP.md` and the associated runbooks.
 
-## Future Automation
+## Manual and Interactive Steps
 
-The documented process will gradually be automated.
+Some responsibilities deliberately remain outside unattended automation.
 
-Planned automation includes:
+These include:
 
-- Homebrew installation
-- Brewfile restoration
-- dotfiles restoration
-- project cloning
-- system validation
-- one-command orchestration
+- initial macOS Setup Assistant,
+- macOS updates and FileVault verification,
+- Xcode Command Line Tools installation where required,
+- creation and registration of machine-specific SSH credentials,
+- interactive authentication for services such as ChatGPT and Codex,
+- restoration of secrets from their secure source,
+- application permissions or other macOS prompts,
+- and first-launch verification where an application requires it.
 
-Automation should remain understandable, independently testable and free from hidden side effects.
+Secrets are never stored in this repository.
+
+## Validation
+
+The final automated stage runs:
+
+```bash
+./scripts/validate-system.sh
+```
+
+It verifies the machine state that `mac-bootstrap` can determine safely and non-destructively, including:
+
+- macOS and Apple Silicon,
+- Homebrew,
+- Brewfile dependencies,
+- the dotfiles repository,
+- the Neovim-AIDE repository,
+- the Neovim runtime symlink,
+- and required command-line tools.
+
+Validation reports individual `PASS` or `FAIL` results and exits unsuccessfully if any required check fails.
+
+The post-install checklist remains the final human verification of items that cannot or should not be inferred automatically.
 
 ## Related Repositories
 
@@ -152,13 +224,12 @@ Provisioning a new Mac should become routine.
 
 The intended workflow is:
 
-1. Complete macOS setup.
-2. Establish the minimum prerequisites required to access GitHub.
-3. Clone this repository.
-4. Follow the documented bootstrap process.
-5. Restore credentials securely.
-6. Validate the environment.
-7. Resume development.
+1. Complete the small manual bootstrap boundary.
+2. Clone this repository.
+3. Run the bootstrap orchestrator.
+4. Restore credentials and complete interactive setup securely.
+5. Validate the environment.
+6. Resume development.
 
 The machine becomes replaceable.
 

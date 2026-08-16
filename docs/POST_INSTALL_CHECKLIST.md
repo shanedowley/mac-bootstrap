@@ -1,40 +1,35 @@
 # Post-Install Checklist
 
-Use this checklist after completing the initial macOS Setup Assistant on a new or freshly installed Mac.
+Use this checklist when rebuilding a new or freshly installed Mac.
 
-The objective is to prepare the machine for the `mac-bootstrap` process with the minimum necessary manual configuration.
+The checklist spans the complete rebuild: the small manual bootstrap boundary, automated restoration, and final human verification.
 
-## 1. Update macOS
+The detailed end-to-end procedure is maintained in:
 
+`NEW_MAC_SETUP.md`
+
+## 1. Prepare macOS
+
+- [ ] Complete the initial macOS Setup Assistant.
 - [ ] Install all available macOS updates.
 - [ ] Restart if required.
-- [ ] Confirm no further system updates are pending.
-
-## 2. Restore Apple and iCloud Services
-
+- [ ] Confirm no further required system updates are pending.
 - [ ] Sign in with the required Apple Account.
 - [ ] Enable the required iCloud services.
-- [ ] Allow iCloud content, applications and settings to synchronise.
-- [ ] Verify expected Apple services are working.
-
-Do not wait for all personal data to finish synchronising before continuing unless it is required by a later step.
-
-## 3. Verify FileVault
-
-- [ ] Confirm FileVault is enabled.
-- [ ] Confirm the recovery mechanism is understood and available.
+- [ ] Verify FileVault is enabled.
+- [ ] Confirm the FileVault recovery mechanism is understood and available.
 
 Do not store FileVault recovery credentials in this repository.
 
-## 4. Install Developer Prerequisites
+## 2. Install Developer Prerequisites
 
-Install the Xcode Command Line Tools:
+Install the Xcode Command Line Tools if required:
 
 ```bash
 xcode-select --install
 ```
 
-Then verify:
+Verify:
 
 ```bash
 xcode-select -p
@@ -46,91 +41,122 @@ git --version
 
 The full Xcode application is not required.
 
-## 5. Establish GitHub Access
+## 3. Establish SSH and GitHub Access
 
 The machine must be able to access GitHub before `mac-bootstrap` can restore the remaining environment.
 
-- [ ] Configure SSH access.
-- [ ] Verify GitHub authentication.
+- [ ] Create the machine-specific SSH identity.
+- [ ] Register the public key with GitHub.
+- [ ] Verify GitHub SSH authentication.
 - [ ] Clone the `mac-bootstrap` repository.
 
-Detailed procedures are maintained separately:
+Detailed procedures are maintained in:
 
 - `SSH_SETUP.md`
 - `GITHUB_SETUP.md`
 
-This is the small manual bootstrap boundary: the machine must have enough tooling and authentication configured to obtain the repository that performs the remaining bootstrap.
+At this point the minimum manual bootstrap boundary is complete.
 
-## 6. Restore Software
+## 4. Run the Automated Bootstrap
 
-Use the repository Brewfile to restore the required applications, command-line tools and packages.
+From the `mac-bootstrap` repository, optionally inspect the intended actions first:
 
-This includes workstation tooling such as:
+```bash
+./bootstrap.sh --dry-run
+```
 
-- Ghostty
-- Aerospace
-- SketchyBar
-- Karabiner-Elements
-- tmux
-- Neovim
+Then run:
 
-- [ ] Homebrew installed.
-- [ ] Brewfile restored.
-- [ ] Required applications and command-line tools available.
+```bash
+./bootstrap.sh
+```
 
-## 7. Restore Configuration
+The bootstrap restores or verifies Homebrew, Brewfile dependencies, dotfiles, Neovim-AIDE and the Neovim runtime link before performing automated system validation.
 
-Restore the version-controlled dotfiles.
+- [ ] `./bootstrap.sh` completes successfully.
+- [ ] Automated validation reports `System validation passed.`
 
-This includes configuration such as:
+If the bootstrap fails, diagnose the failed stage before continuing.
 
-- `.zshrc`
-- Ghostty
-- tmux
-- Aerospace
-- SketchyBar
-- Karabiner-Elements
-- Neovim
+See `TROUBLESHOOTING.md` for guidance.
 
-- [ ] Dotfiles restored.
-- [ ] Shell configuration working.
-- [ ] Terminal environment working.
-- [ ] Window-management and desktop tooling working.
+## 5. Verify Shell and Terminal Environment
 
-See `DOTFILES.md` for the detailed procedure.
+Start a new shell or terminal session after dotfiles restoration.
 
-## 8. Restore Neovim-AIDE
+- [ ] Restored Zsh configuration loads correctly.
+- [ ] Ghostty starts and behaves as expected.
+- [ ] tmux starts and behaves as expected.
+- [ ] Expected shell commands and aliases are available.
 
-- [ ] Restore or clone the Neovim-AIDE repository.
-- [ ] Start Neovim.
-- [ ] Allow required plugins and dependencies to install.
-- [ ] Verify the development environment starts correctly.
-- [ ] Run relevant health checks.
+## 6. Verify Desktop Tooling
 
-## 9. Restore AI Development Tools
+Confirm the restored workstation applications and configuration operate correctly.
 
-- [ ] Install or verify ChatGPT.
-- [ ] Install or verify Codex tooling.
-- [ ] Authenticate with the required services.
-- [ ] Verify the tools can be used from the restored development environment.
+- [ ] Aerospace works correctly.
+- [ ] SketchyBar works correctly.
+- [ ] Karabiner-Elements works correctly.
+- [ ] Required macOS permissions have been granted.
 
-Do not store authentication tokens, API keys or other secrets in this repository.
+Complete any first-launch or macOS security/privacy prompts manually where required.
 
-## 10. Validate the Machine
+## 7. Verify Neovim-AIDE
 
-Before considering the bootstrap complete:
+Confirm the restored repository and runtime environment work in actual use.
+
+- [ ] Neovim starts successfully.
+- [ ] `~/.config/nvim` resolves to `~/Projects/neovim-codex`.
+- [ ] Required plugins and dependencies are installed.
+- [ ] Neovim-AIDE loads correctly.
+- [ ] Relevant Neovim-AIDE health checks pass.
+- [ ] Normal editing and development workflows operate correctly.
+
+## 8. Restore and Verify AI Development Tools
+
+Complete any required interactive installation or authentication that cannot be safely automated.
+
+- [ ] ChatGPT is installed and available.
+- [ ] ChatGPT authentication is complete.
+- [ ] Codex tooling is available.
+- [ ] Codex authentication is complete.
+- [ ] AI development tools work from the restored environment.
+
+Never store authentication tokens, API keys or other secrets in this repository.
+
+## 9. Restore Required Secrets
+
+Restore additional credentials and secrets from their appropriate secure source.
+
+These may include:
+
+- application credentials,
+- API keys,
+- service tokens,
+- and other private configuration.
+
+- [ ] Required secrets restored.
+- [ ] Applications or tools depending on those secrets work correctly.
+- [ ] No secrets have been added to version-controlled repositories.
+
+## 10. Final Machine Acceptance
+
+Before considering the rebuild complete:
 
 - [ ] macOS is current.
 - [ ] FileVault is enabled.
-- [ ] Xcode Command Line Tools are available.
 - [ ] GitHub access works.
 - [ ] Homebrew is working.
-- [ ] Brewfile dependencies are installed.
-- [ ] Dotfiles are restored.
-- [ ] Shell and tmux work correctly.
-- [ ] Ghostty works correctly.
-- [ ] Aerospace, SketchyBar and Karabiner-Elements work correctly.
-- [ ] Neovim-AIDE starts and passes its health checks.
+- [ ] Brewfile dependencies are satisfied.
+- [ ] Dotfiles are restored and clean.
+- [ ] Shell and terminal environment work correctly.
+- [ ] Desktop tooling works correctly.
+- [ ] Neovim-AIDE works correctly.
 - [ ] ChatGPT and Codex are available and authenticated.
+- [ ] Required secrets are restored securely.
+- [ ] `./scripts/validate-system.sh` passes.
 
 The machine is now ready for development.
+
+The machine is replaceable.
+
+The environment is reproducible.

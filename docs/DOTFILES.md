@@ -59,7 +59,46 @@ Expected remote:
 git@github.com:shanedowley/dotfiles.git
 ```
 
-## 3. Check Out the Configuration
+## 3. Configure the Bare Repository
+
+Before inspecting or checking out the home-directory working tree, configure the repository-local Git settings required by this dotfiles setup.
+
+Disable filesystem monitoring for the bare repository:
+
+```bash
+git --git-dir="$HOME/.dotfiles" config core.fsmonitor false
+```
+
+A global Git configuration may enable filesystem monitoring. For this bare-repository and external-working-tree configuration, it must be disabled locally before checkout.
+
+The home directory also contains many files that do not belong in the dotfiles repository.
+
+Configure Git not to display those untracked files:
+
+```bash
+git --git-dir="$HOME/.dotfiles" \
+  --work-tree="$HOME" \
+  config status.showUntrackedFiles no
+```
+
+Verify both repository-local settings:
+
+```bash
+git --git-dir="$HOME/.dotfiles" config --get core.fsmonitor
+
+git --git-dir="$HOME/.dotfiles" \
+  --work-tree="$HOME" \
+  config --get status.showUntrackedFiles
+```
+
+Expected:
+
+```text
+false
+no
+```
+
+## 4. Check Out the Configuration
 
 Before checkout, inspect the current state:
 
@@ -76,16 +115,6 @@ git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" checkout
 If checkout reports that existing files would be overwritten, stop.
 
 Do not delete or overwrite those files blindly. Inspect them and decide whether they should be backed up, removed or retained before retrying the checkout.
-
-## 4. Hide Untracked Home Files
-
-The home directory contains many files that do not belong in the dotfiles repository.
-
-Configure Git not to display them:
-
-```bash
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config status.showUntrackedFiles no
-```
 
 ## 5. Verify the Repository
 
@@ -116,10 +145,56 @@ Expected:
 true
 ```
 
+Verify that filesystem monitoring is disabled locally:
+
+```bash
+git --git-dir="$HOME/.dotfiles" config --get core.fsmonitor
+```
+
+Expected:
+
+```text
+false
+```
+
+Verify that untracked home files are hidden:
+
+```bash
+git --git-dir="$HOME/.dotfiles" \
+  --work-tree="$HOME" \
+  config --get status.showUntrackedFiles
+```
+
+Expected:
+
+```text
+no
+```
+
 Verify the remote:
 
 ```bash
 git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" remote -v
+```
+
+Expected remote:
+
+```text
+git@github.com:shanedowley/dotfiles.git
+```
+
+Verify the current branch:
+
+```bash
+git --git-dir="$HOME/.dotfiles" \
+  --work-tree="$HOME" \
+  branch --show-current
+```
+
+Expected:
+
+```text
+main
 ```
 
 ## 6. Verify Restored Configuration
@@ -147,6 +222,8 @@ Confirm:
 
 - [ ] `~/.dotfiles` exists.
 - [ ] The repository is bare.
+- [ ] `core.fsmonitor` is `false`.
+- [ ] `status.showUntrackedFiles` is `no`.
 - [ ] The repository uses `main`.
 - [ ] `origin` points to the expected GitHub repository.
 - [ ] The home directory is used as the working tree.
