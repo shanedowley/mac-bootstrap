@@ -121,6 +121,12 @@ check_dotfiles() {
     fail "Dotfiles fsmonitor disabled"
   fi
 
+  if [[ "$(/usr/bin/git --git-dir="$DOTFILES_DIR" config --get status.showUntrackedFiles 2>/dev/null || true)" == "no" ]]; then
+    pass "Dotfiles untracked files hidden"
+  else
+    fail "Dotfiles untracked files hidden"
+  fi
+
   local remote
   remote="$(/usr/bin/git --git-dir="$DOTFILES_DIR" remote get-url origin 2>/dev/null || true)"
 
